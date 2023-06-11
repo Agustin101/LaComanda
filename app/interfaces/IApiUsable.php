@@ -1,9 +1,9 @@
 <?php
+
+use Psr\Http\Message\ResponseInterface as IResponse;
+use Psr\Http\Message\ServerRequestInterface as IRequest;
+
 interface IApiUsable
 {
-	public function TraerUno($request, $response, $args);
-	public function TraerTodos($request, $response, $args);
-	public function CargarUno($request, $response, $args);
-	public function BorrarUno($request, $response, $args);
-	public function ModificarUno($request, $response, $args);
+	public function AgregarUsuario(IRequest $request, IResponse $response, $args);
 }
