@@ -1,8 +1,5 @@
 <?php
 
-require_once "./Enums/Rol.php";
-require_once "./Enums/Sector.php";
-
 class Usuario
 {
     public $id;
@@ -10,9 +7,9 @@ class Usuario
     public $apellido;
     public $usuario;
     public $clave;
-    public Rol $rol;
+    public $rol;
     public $activo;
-    public Sector $sector;
+    public $sector;
     public $suspendido;
 
     public function __construct($nombre, $apellido, $usuario, $clave, $rol, $sector, $suspendido = 0)

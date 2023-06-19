@@ -9,15 +9,15 @@ class MesaRepositorio
     {
         try {
             $conn = AccesoDatos::obtenerInstancia();
-            $query = $conn->prepararConsulta("INSERT INTO MESAS (MES_CODIGO, MES_ESTADO) VALUES (?, ?)");
-            $query->bindParam(1, $mesa->codigo);
-            $query->bindParam(2, $mesa->estado);
+            $query = $conn->prepararConsulta("INSERT INTO MESAS (DESCRIPCION, CODIGO) VALUES (?, ?)");
+            $query->bindParam(1, $mesa->descripcion);
+            $query->bindParam(2, $mesa->codigo);
 
             $query->execute();
 
             return true;
         } catch (Exception $ex) {
-            return false;
+            throw $ex;
         }
     }
 
@@ -25,11 +25,27 @@ class MesaRepositorio
     {
         try {
             $conn = AccesoDatos::obtenerInstancia();
-            $query = $conn->prepararConsulta("UPDATE MESAS SET MES_CODIGO = :codigo, MES_ESTADO = :estado, MES_ACTIVA = :activa, MES_FH_MODIF = CURRENT_TIMESTAMP() WHERE MES_ID = :id");
+            $query = $conn->prepararConsulta("UPDATE MESAS SET ESTADO = :estado, CODIGO = :codigo, DESCRIPCION = :descripcion, FH_MODIF = CURRENT_TIMESTAMP() WHERE ID = :id");
 
-            $query->bindValue(":codigo", $mesa->codigo);
             $query->bindValue(":id", $id);
+            $query->bindValue(":descripcion", $mesa->descripcion);
             $query->bindValue(":estado", $mesa->estado);
+            $query->bindValue(":codigo", $mesa->codigo);
+
+            $query->execute();
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+        }
+    }
+
+    public static function ActualizarEstadoMesa(int $mesaId, int $estado)
+    {
+        try {
+            $conn = AccesoDatos::obtenerInstancia();
+            $query = $conn->prepararConsulta("UPDATE MESAS SET ESTADO = :estado, FH_MODIF = CURRENT_TIMESTAMP() WHERE ID = :id");
+
+            $query->bindValue(":id", $mesaId);
+            $query->bindValue(":estado", $estado);
 
             $query->execute();
         } catch (Exception $ex) {
@@ -40,7 +56,7 @@ class MesaRepositorio
     public static function ObtenerMesas()
     {
         $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("SELECT MES_ID AS id, MES_CODIGO AS codigo, MES_ESTADO AS estado, MES_ACTIVA AS activa, MES_FH_ALTA AS fechaAlta, MES_FH_MODIF AS fechaModificacion, MES_FH_BAJA AS fechaBaja FROM MESAS");
+        $query = $conn->prepararConsulta("SELECT ID AS id, ESTADO AS estado, ACTIVA AS activa, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, FH_BAJA AS fechaBaja, DESCRIPCION as descripcion, CODIGO as codigo FROM MESAS");
         $query->execute();
 
         return $query->fetchAll(pdo::FETCH_CLASS, "Mesa");
@@ -49,8 +65,18 @@ class MesaRepositorio
     public static function ObtenerMesaPorId($id)
     {
         $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("SELECT MES_ID AS id, MES_CODIGO AS codigo, MES_ESTADO AS estado, MES_ACTIVA AS activa, MES_FH_ALTA AS fechaAlta, MES_FH_MODIF AS fechaModificacion, MES_FH_BAJA AS fechaBaja FROM MESAS WHERE MES_ID = :id");
+        $query = $conn->prepararConsulta("SELECT ID AS id, ESTADO AS estado, ACTIVA AS activa, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, FH_BAJA AS fechaBaja, DESCRIPCION as descripcion, CODIGO as codigo FROM MESAS WHERE ID = :id");
         $query->bindValue(':id', $id, PDO::PARAM_INT);
+        $query->execute();
+
+        return $query->fetchObject("Mesa");
+    }
+
+    public static function ObtenerMesaPorCodigo($codigo)
+    {
+        $conn = AccesoDatos::obtenerInstancia();
+        $query = $conn->prepararConsulta("SELECT ID AS id, ESTADO AS estado, ACTIVA AS activa, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, FH_BAJA AS fechaBaja, DESCRIPCION as descripcion, CODIGO as codigo FROM MESAS WHERE CODIGO = :codigo");
+        $query->bindValue(':codigo', $codigo, PDO::PARAM_STR);
         $query->execute();
 
         return $query->fetchObject("Mesa");
@@ -59,16 +85,16 @@ class MesaRepositorio
     public static function BorrarMesa($id)
     {
         $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("UPDATE MESAS SET MES_ACTIVA = 0, MES_FH_BAJA = CURRENT_TIMESTAMP() WHERE MES_ID = :id");
+        $query = $conn->prepararConsulta("UPDATE MESAS SET ACTIVA = 0, FH_BAJA = CURRENT_TIMESTAMP() WHERE ID = :id");
         $query->bindValue(':id', $id, PDO::PARAM_INT);
         $query->execute();
     }
 
-    public static function ExisteProducto(string $user)
+    public static function ExisteMesa(string $codigo)
     {
         $sql = AccesoDatos::obtenerInstancia();
-        $query = $sql->prepararConsulta("SELECT * FROM USUARIOS WHERE USU_USUARIO = ?");
-        $query->bindParam(1, $user);
+        $query = $sql->prepararConsulta("SELECT * FROM MESAS WHERE CODIGO = ?");
+        $query->bindParam(1, $codigo);
         $query->execute();
         return $query->rowCount() > 0 ? true : false;
     }

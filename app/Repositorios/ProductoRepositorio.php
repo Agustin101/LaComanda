@@ -9,68 +9,93 @@ class ProductoRepositorio
     {
         try {
             $conn = AccesoDatos::obtenerInstancia();
-            $query = $conn->prepararConsulta("INSERT INTO ARTICULOS (ART_CODIGO, ART_DESC, ART_SEC) VALUES (?, ?, ?)");
-            $query->bindParam(1, $producto->codigo);
+            $query = $conn->prepararConsulta("INSERT INTO PRODUCTOS (CODIGO_PRODUCTO, DESCRIPCION, CODIGO_SECTOR, PRECIO) VALUES (?, ?, ?, ?)");
+            $query->bindParam(1, $producto->productoCodigo);
             $query->bindParam(2, $producto->descripcion);
-            $query->bindParam(3, $producto->sector);
+            $query->bindParam(3, $producto->sectorCodigo);
+            $query->bindParam(4, $producto->precio);
+
             $query->execute();
-            
+
             return true;
         } catch (Exception $ex) {
-            return false;
+            throw $ex;
         }
     }
-    
+
     public static function ModificarProducto(int $id, Producto $producto)
     {
         try {
             $conn = AccesoDatos::obtenerInstancia();
-            $query = $conn->prepararConsulta("UPDATE ARTICULOS SET ART_CODIGO = :codigo, ART_DESC = :desc, ART_SEC = :sector, ART_FH_MODIF = CURRENT_TIMESTAMP() WHERE ART_ID = :id");
+            $query = $conn->prepararConsulta("UPDATE PRODUCTOS SET CODIGO_PRODUCTO = :codigo, DESCRIPCION = :desc, CODIGO_SECTOR = :sector, PRECIO = :precio, FH_MODIF = CURRENT_TIMESTAMP() WHERE ID = :id");
 
-            $query->bindValue(":codigo", $producto->codigo);
+            $query->bindValue(":codigo", $producto->productoCodigo);
             $query->bindValue(":desc", $producto->descripcion);
-            $query->bindValue(":sector", $producto->sector);
+            $query->bindValue(":sector", $producto->sectorCodigo);
+            $query->bindValue(":precio", $producto->precio);
             $query->bindValue(":id", $id);
 
             $query->execute();
         } catch (Exception $ex) {
-            echo $ex->getMessage();
+            throw $ex;
         }
     }
 
     public static function ObtenerProductos()
     {
-        $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("SELECT ART_ID AS id, ART_CODIGO AS codigo, ART_DESC AS descripcion, ART_SEC AS sector, ART_FH_ALTA AS fechaAlta, ART_FH_MODIF AS fechaModificacion, ART_ACTIVO AS activo, ART_FH_BAJA AS fechaBaja FROM ARTICULOS");
-        $query->execute();
-
-        return $query->fetchAll(pdo::FETCH_CLASS, "Producto");
+        try{
+            $conn = AccesoDatos::obtenerInstancia();
+            $query = $conn->prepararConsulta("SELECT ID AS id, CODIGO_PRODUCTO AS productoCodigo, DESCRIPCION AS descripcion, CODIGO_SECTOR AS sectorCodigo, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, ACTIVO AS activo, FH_BAJA AS fechaBaja, PRECIO as precio FROM PRODUCTOS");
+            $query->execute();
+    
+            return $query->fetchAll(pdo::FETCH_CLASS, "Producto");
+        }
+        catch(Exception $ex){
+            throw $ex;
+        }
     }
 
     public static function ObtenerProductoPorId($id)
     {
-        $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("SELECT ART_ID AS id, ART_CODIGO AS codigo, ART_DESC AS descripcion, ART_SEC AS sector, ART_FH_ALTA AS fechaAlta, ART_FH_MODIF AS fechaModificacion, ART_ACTIVO AS activo, ART_FH_BAJA AS fechaBaja FROM ARTICULOS WHERE ART_ID = :id");
-        $query->bindValue(':id', $id, PDO::PARAM_INT);
-        $query->execute();
-        
-        return $query->fetchObject("Producto");
-    }
+        try {
+            $conn = AccesoDatos::obtenerInstancia();
+            $query = $conn->prepararConsulta("SELECT ID AS id, CODIGO_PRODUCTO AS productoCodigo, DESCRIPCION AS descripcion, CODIGO_SECTOR AS sectorCodigo, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, ACTIVO AS activo, FH_BAJA AS fechaBaja, PRECIO as precio FROM PRODUCTOS WHERE ID = :id");
+            $query->bindValue(':id', $id, PDO::PARAM_INT);
+            $query->execute();
 
+            return $query->fetchObject("Producto");
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
 
     public static function BorrarProducto($id)
     {
-        $conn = AccesoDatos::obtenerInstancia();
-        $query = $conn->prepararConsulta("UPDATE ARTICULOS SET ART_ACTIVO = 0, ART_FH_BAJA = CURRENT_TIMESTAMP() WHERE ART_ID = :id");
-        $query->bindValue(':id', $id, PDO::PARAM_INT);
-        $query->execute();
+        try{
+            $conn = AccesoDatos::obtenerInstancia();
+            $query = $conn->prepararConsulta("UPDATE PRODUCTOS SET ACTIVO = 0, FH_BAJA = CURRENT_TIMESTAMP() WHERE ID = :id");
+            $query->bindValue(':id', $id, PDO::PARAM_INT);
+            $query->execute();
+        }
+        catch (Exception $ex){
+            throw $ex;
+        }
     }
 
-    public static function ExisteProducto(string $user)
+    public static function ExisteProducto(string $productoCodigo)
     {
         $sql = AccesoDatos::obtenerInstancia();
-        $query = $sql->prepararConsulta("SELECT * FROM USUARIOS WHERE USU_USUARIO = ?");
-        $query->bindParam(1, $user);
+        $query = $sql->prepararConsulta("SELECT * FROM PRODUCTOS WHERE CODIGO_PRODUCTO = ?");
+        $query->bindParam(1, $productoCodigo);
+        $query->execute();
+        return $query->rowCount() > 0 ? true : false;
+    }
+
+    public static function ExisteProductoPorId(string $productoId)
+    {
+        $sql = AccesoDatos::obtenerInstancia();
+        $query = $sql->prepararConsulta("SELECT * FROM PRODUCTOS WHERE ID = ?");
+        $query->bindParam(1, $productoId);
         $query->execute();
         return $query->rowCount() > 0 ? true : false;
     }

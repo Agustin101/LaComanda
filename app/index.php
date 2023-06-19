@@ -2,8 +2,6 @@
 error_reporting(-1);
 ini_set('display_errors', 1);
 
-use Psr\Http\Message\ResponseInterface as IResponse;
-use Psr\Http\Message\ServerRequestInterface as IRequest;
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -14,7 +12,10 @@ require_once './middlewares/UsuarioMw.php';
 require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductosController.php';
 require_once './controllers/MesasController.php';
+require_once './controllers/PedidosController.php';
 require_once './controllers/AutorizacionController.php';
+require_once './controllers/ClientesController.php';
+
 require_once './middlewares/JwtMw.php';
 require_once './middlewares/SocioMw.php';
 
@@ -30,7 +31,7 @@ $app->setBasePath('/LaComanda/app');
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
 //-- TP --
-
+$app->addBodyParsingMiddleware();
 //LOGIN
 $app->post("/login", \AutorizacionController::class . ":GenerarToken")
     ->add(\UsuarioMw::class . ":VerificarUsuarioExistente")
@@ -49,8 +50,8 @@ $app->group("/usuarios", function (RouteCollectorProxy $group) {
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
 
-//ABM PRODUCTOS
-//TODO: Verificar que el producto no existe antes de dar alta
+//ABM PRODUCTOS y que el adm tamnien pueda dar4 de alta
+//TODO: Verificar que el sector asignado a un producto exista.
 $app->group("/productos", function (RouteCollectorProxy $group) {
     $group->post("[/]", \ProductosController::class . ":AgregarProducto");
     $group->put("/{id}", \ProductosController::class . ":ModificarProducto");
@@ -61,7 +62,7 @@ $app->group("/productos", function (RouteCollectorProxy $group) {
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
 
-//ABM MESAS
+//ABM MESAS y que el adm tamnien pueda dar4 de alta
 $app->group("/mesas", function (RouteCollectorProxy $group) {
     $group->post("[/]", \MesasController::class . ":AgregarMesa");
     $group->put("/{id}", \MesasController::class . ":ModificarMesa");
@@ -71,5 +72,34 @@ $app->group("/mesas", function (RouteCollectorProxy $group) {
 })
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
+
+//estado: 0 - cancelado - 1 activo - 2 finalizado
+$app->group("/pedidos", function (RouteCollectorProxy $group) {
+    $group->post("[/]", \PedidosController::class . ":CrearPedido")
+        ->add(\UsuarioMw::class . ":ValidarMozo");
+
+    $group->get("[/]", \PedidosController::class . ":ListarPedidos")
+        ->add(\SocioMw::class . ":ValidarSocio");
+
+    $group->get("/sectores", \PedidosController::class . ":PedidosSector");
+
+    $group->put("/{id}", \PedidosController::class . ":ActualizarPedido")
+        ->add(\UsuarioMw::class . ":VerificarSector");
+
+    $group->post("/{id}", \PedidosController::class . ":ServirPedido")
+        ->add(\UsuarioMw::class . ":ValidarMozo");
+
+    $group->post("/cobros/{id}", \PedidosController::class . ":CobrarPedido")
+        ->add(\UsuarioMw::class . ":ValidarMozo");
+
+    $group->post("/foto/{id}", \PedidosController::class . ":AsociarFoto")
+        ->add(\UsuarioMw::class . ":ValidarMozo");
+
+})
+    ->add(\JwtMw::class . ":ValidarToken");
+
+$app->group("/clientes", function (RouteCollectorProxy $group) {
+    $group->get("/", \ClientesController::class . ":ConsultarTiempoEstimado");
+});
 
 $app->run();

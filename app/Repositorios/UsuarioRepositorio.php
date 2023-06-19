@@ -15,8 +15,8 @@ class UsuarioRepositorio
             $consulta->bindParam(2, $usuario->apellido);
             $consulta->bindParam(3, $usuario->usuario);
             $consulta->bindParam(4, $claveHash);
-            $consulta->bindParam(5, $usuario->rol->valor());
-            $consulta->bindParam(6, $usuario->sector->valor());
+            $consulta->bindParam(5, $usuario->rol);
+            $consulta->bindParam(6, $usuario->sector);
             $consulta->execute();
             return true;
         } catch (Exception $ex) {
@@ -55,23 +55,22 @@ class UsuarioRepositorio
 
     public static function ModificarUsuario(int $id, Usuario $usuario)
     {
-        try{
+        try {
             $conn = AccesoDatos::obtenerInstancia();
             $query = $conn->prepararConsulta("UPDATE USUARIOS SET USU_NOMBRE = :nombre, USU_APELLIDO = :apellido, USU_USUARIO = :usuario, USU_CLAVE = :clave, USU_ROL = :rol, USU_SECTOR = :sector, USU_SUSPENDIDO = :suspendido, USU_FH_MODIF = CURRENT_TIMESTAMP() WHERE USU_ID = :id");
-    
+
             $hashPsw = password_hash($usuario->clave, PASSWORD_DEFAULT);
             $query->bindValue(":nombre", $usuario->nombre);
             $query->bindValue(":apellido", $usuario->apellido);
             $query->bindValue(":usuario", $usuario->usuario);
             $query->bindValue(":clave", $hashPsw);
-            $query->bindValue(":rol", $usuario->rol->valor());
-            $query->bindValue(":sector", $usuario->sector->valor());
+            $query->bindValue(":rol", $usuario->rol);
+            $query->bindValue(":sector", $usuario->sector);
             $query->bindValue(":suspendido", $usuario->suspendido);
             $query->bindValue(":id", $id);
-    
+
             $query->execute();
-        }
-        catch(Exception $ex){
+        } catch (Exception $ex) {
             echo $ex->getMessage();
         }
     }
@@ -92,4 +91,11 @@ class UsuarioRepositorio
         $query->execute();
         return $query->rowCount() > 0 ? true : false;
     }
+
+    public static function ObtenerSectorUsuario($id)
+    {
+        $usuario = UsuarioRepositorio::ObtenerUsuarioPorId($id);
+        return $usuario->sector;
+    }
+
 }

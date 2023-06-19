@@ -11,10 +11,21 @@ class MesasController
     {
         $parametros = $request->getParsedBody();
         $mesa = new Mesa();
+        $mesa->descripcion = $parametros["descripcion"];
         $mesa->codigo = $parametros["codigo"];
-        $mesa->estado = $parametros["estado"];
+        if (MesaRepositorio::ExisteMesa($mesa->codigo)) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "Ya existe una mesa con ese codigo.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
 
-        MesaRepositorio::AgregarMesa($mesa);
+        try {
+            MesaRepositorio::AgregarMesa($mesa);
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+            $res = new Response();
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
 
         $payload = json_encode(array("mensaje" => "Mesa creada con exito."));
 
@@ -25,15 +36,26 @@ class MesasController
 
     public function ModificarMesa(IRequest $req, IResponse $res, array $args)
     {
-        parse_str(file_get_contents('php://input'), $parametros);
+        $parametros = $req->getParsedBody();
         $id = $args['id'];
         $mesa = new Mesa();
-        $mesa->codigo = $parametros["codigo"];
+        if (MesaRepositorio::ObtenerMesaPorId($id) === false) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "La mesa no existe.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
         $mesa->estado = $parametros["estado"];
-        $mesa->activa = $parametros["activa"];
+        $mesa->descripcion = $parametros["descripcion"];
+        $mesa->codigo = $parametros["codigo"];
 
-        MesaRepositorio::ModificarMesa($id, $mesa);
-
+        try {
+            MesaRepositorio::ModificarMesa($id, $mesa);
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+            $res = new Response();
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
         $payload = json_encode(array("mensaje" => "Mesa modificado con exito"));
 
         $res->getBody()->write($payload);
@@ -72,6 +94,12 @@ class MesasController
     public function EliminarMesa(IRequest $req, IResponse $res, array $args)
     {
         $id = $args['id'];
+        if (MesaRepositorio::ObtenerMesaPorId($id) === false) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "La mesa no existe.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
         MesaRepositorio::BorrarMesa($id);
         $payload = json_encode(array("mensaje" => "Mesa borrada con exito"));
 

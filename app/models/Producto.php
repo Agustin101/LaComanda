@@ -2,11 +2,12 @@
 
 class Producto{
     public $id;
-    public $codigo;
+    public $productoCodigo;
     public $descripcion;
-    public $sector;
+    public $sectorCodigo;
     public $fechaAlta;
     public $fechaModificacion;
     public $activo;
     public $fechaBaja;
+    public $precio;
 }
