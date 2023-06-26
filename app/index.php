@@ -48,7 +48,6 @@ $app->group("/usuarios", function (RouteCollectorProxy $group) {
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
 
-//TODO: Verificar que el sector asignado a un producto exista.
 $app->group("/productos", function (RouteCollectorProxy $group) {
     $group->post("[/]", \ProductosController::class . ":AgregarProducto");
     $group->put("/{id}", \ProductosController::class . ":ModificarProducto");
