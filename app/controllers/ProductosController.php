@@ -23,6 +23,13 @@ class ProductosController
                 ->withStatus(406);
         }
 
+        if (!ProductoRepositorio::ExisteSector($producto->sectorCodigo)) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "No se puede crear el producto, el sector indicado no existe.")));
+            return $res->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+
         try {
             ProductoRepositorio::AgregarProducto($producto);
         } catch (Exception $ex) {

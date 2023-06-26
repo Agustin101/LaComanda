@@ -11,6 +11,14 @@ class UsuarioController implements IApiUsable
     public function AgregarUsuario(IRequest $request, IResponse $response, $args)
     {
         $parametros = $request->getParsedBody();
+        $usuario = $parametros["usuario"];
+
+        if (UsuarioRepositorio::ExisteUsuario($usuario)) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "Error, el usuario ingresado ya existe.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
         $usuario = new Usuario($parametros["nombre"], $parametros["apellido"], $parametros["usuario"],
             $parametros["clave"], $parametros["rol"], $parametros["sector"]);
         UsuarioRepositorio::AgregarUsuario($usuario);
@@ -54,6 +62,14 @@ class UsuarioController implements IApiUsable
     {
         parse_str(file_get_contents('php://input'), $parametros);
         $id = $args['id'];
+        $usuario = $parametros["usuario"];
+
+        if (UsuarioRepositorio::ExisteUsuario($usuario)) {
+            $res = new Response();
+            $res->getBody()->write(json_encode(array("mensaje" => "Error, el usuario ingresado ya existe.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
         $usuario = new Usuario($parametros['nombre'], $parametros['apellido'], $parametros['usuario'], $parametros['clave'], $parametros['rol'], $parametros['sector'], $parametros['suspendido']
         );
 

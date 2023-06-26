@@ -1,0 +1,9 @@
+id,productoCodigo,descripcion,sectorCodigo,fechaAlta,fechaModificacion,activo,fechaBaja,precio
+5,CC6,"Cocacola de 600 ML",CN,"2023-06-14 22:26:36","2023-06-14 22:28:17",1,,450.00
+6,MNC,"Milanesa napolitana completa",CN,"2023-06-14 22:51:53",,1,,3450.00
+7,IPABR,"Cerveza IPA",CHP,"2023-06-14 22:52:26",,1,,1200.00
+8,HDBC,"Hamburguesa doble bacon",CN,"2023-06-14 22:53:01",,1,,2700.00
+9,HDP,"Hamburguesa de pollo",CN,"2023-06-17 16:58:42",,1,,1900.00
+10,2HDP,"Hamburguesa de pollo doble",CN,"2023-06-24 18:05:29",,1,,3000.00
+24,CBD,"Cheese burguer doble",CN,"2023-04-24 00:00:00","2023-05-25 00:00:00",0,"2023-06-20 00:00:00",3300.00
+25,CB,"Cheese burguer",CN,"2023-06-25 00:00:00",,1,,2500.00

@@ -11,6 +11,7 @@ require_once './db/AccesoDatos.php';
 require_once './middlewares/UsuarioMw.php';
 require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductosController.php';
+require_once './controllers/BackupController.php';
 require_once './controllers/MesasController.php';
 require_once './controllers/PedidosController.php';
 require_once './controllers/AutorizacionController.php';
@@ -37,9 +38,6 @@ $app->post("/login", \AutorizacionController::class . ":GenerarToken")
     ->add(\UsuarioMw::class . ":VerificarUsuarioExistente")
     ->add(\UsuarioMw::class . ":ValidarCampos");
 
-//ABM USUARIOS
-
-//TODO: Verificar que el usuario no existe antes de dar alta
 $app->group("/usuarios", function (RouteCollectorProxy $group) {
     $group->post("[/]", \UsuarioController::class . ":AgregarUsuario");
     $group->put("/{id}", \UsuarioController::class . ":ModificarUsuario");
@@ -50,7 +48,6 @@ $app->group("/usuarios", function (RouteCollectorProxy $group) {
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
 
-//ABM PRODUCTOS y que el adm tamnien pueda dar4 de alta
 //TODO: Verificar que el sector asignado a un producto exista.
 $app->group("/productos", function (RouteCollectorProxy $group) {
     $group->post("[/]", \ProductosController::class . ":AgregarProducto");
@@ -62,7 +59,6 @@ $app->group("/productos", function (RouteCollectorProxy $group) {
     ->add(\SocioMw::class . ":ValidarSocio")
     ->add(\JwtMw::class . ":ValidarToken");
 
-//ABM MESAS y que el adm tamnien pueda dar4 de alta
 $app->group("/mesas", function (RouteCollectorProxy $group) {
     $group->post("[/]", \MesasController::class . ":AgregarMesa");
     $group->put("/{id}", \MesasController::class . ":ModificarMesa");
@@ -101,5 +97,11 @@ $app->group("/pedidos", function (RouteCollectorProxy $group) {
 $app->group("/clientes", function (RouteCollectorProxy $group) {
     $group->get("/", \ClientesController::class . ":ConsultarTiempoEstimado");
 });
+
+$app->group("/csv", function (RouteCollectorProxy $group) {
+    $group->get("[/]", \BackupController::class . ":DescargarBackup");
+    $group->post("[/]", \BackupController::class . ":CargarBackup");
+})->add(\SocioMw::class . ":ValidarSocio")
+    ->add(\JwtMw::class . ":ValidarToken");
 
 $app->run();

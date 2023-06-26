@@ -23,6 +23,28 @@ class ProductoRepositorio
         }
     }
 
+    public static function AgregarProductoBackup(Producto $producto)
+    {
+        try {
+            $conn = AccesoDatos::obtenerInstancia();
+            $query = $conn->prepararConsulta("INSERT INTO PRODUCTOS (CODIGO_PRODUCTO, DESCRIPCION, CODIGO_SECTOR, PRECIO, FH_ALTA, FH_MODIF, ACTIVO, FH_BAJA) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $query->bindParam(1, $producto->productoCodigo);
+            $query->bindParam(2, $producto->descripcion);
+            $query->bindParam(3, $producto->sectorCodigo);
+            $query->bindParam(4, $producto->precio);
+            $query->bindParam(5, $producto->fechaAlta);
+            $query->bindParam(6, $producto->fechaModificacion);
+            $query->bindParam(7, $producto->activo);
+            $query->bindParam(8, $producto->fechaBaja);
+
+            $query->execute();
+
+            return true;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
     public static function ModificarProducto(int $id, Producto $producto)
     {
         try {
@@ -43,14 +65,13 @@ class ProductoRepositorio
 
     public static function ObtenerProductos()
     {
-        try{
+        try {
             $conn = AccesoDatos::obtenerInstancia();
             $query = $conn->prepararConsulta("SELECT ID AS id, CODIGO_PRODUCTO AS productoCodigo, DESCRIPCION AS descripcion, CODIGO_SECTOR AS sectorCodigo, FH_ALTA AS fechaAlta, FH_MODIF AS fechaModificacion, ACTIVO AS activo, FH_BAJA AS fechaBaja, PRECIO as precio FROM PRODUCTOS");
             $query->execute();
-    
+
             return $query->fetchAll(pdo::FETCH_CLASS, "Producto");
-        }
-        catch(Exception $ex){
+        } catch (Exception $ex) {
             throw $ex;
         }
     }
@@ -71,13 +92,12 @@ class ProductoRepositorio
 
     public static function BorrarProducto($id)
     {
-        try{
+        try {
             $conn = AccesoDatos::obtenerInstancia();
             $query = $conn->prepararConsulta("UPDATE PRODUCTOS SET ACTIVO = 0, FH_BAJA = CURRENT_TIMESTAMP() WHERE ID = :id");
             $query->bindValue(':id', $id, PDO::PARAM_INT);
             $query->execute();
-        }
-        catch (Exception $ex){
+        } catch (Exception $ex) {
             throw $ex;
         }
     }
@@ -87,6 +107,15 @@ class ProductoRepositorio
         $sql = AccesoDatos::obtenerInstancia();
         $query = $sql->prepararConsulta("SELECT * FROM PRODUCTOS WHERE CODIGO_PRODUCTO = ?");
         $query->bindParam(1, $productoCodigo);
+        $query->execute();
+        return $query->rowCount() > 0 ? true : false;
+    }
+
+    public static function ExisteSector(string $sectorCodigo)
+    {
+        $sql = AccesoDatos::obtenerInstancia();
+        $query = $sql->prepararConsulta("SELECT * FROM SECTORES WHERE SEC_CODIGO = ?");
+        $query->bindParam(1, $sectorCodigo);
         $query->execute();
         return $query->rowCount() > 0 ? true : false;
     }
